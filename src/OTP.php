@@ -66,6 +66,7 @@ class OTP extends Facade
             return (object)[
                 'status' => false,
                 'message' => 'OTP does not exist'
+                // __("laravel-otp::messages.otp_expired")])
             ];
         } else {
             if ($otp->valid == true) {
