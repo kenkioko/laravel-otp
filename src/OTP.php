@@ -25,7 +25,7 @@ class OTP extends Facade
      */
     public function generate(User $identifier, int $digits = 4, int $validity = 10) : object
     {
-        dd($identifier);
+        // dd($identifier);
 
 
         Model::where('identifier', $identifier)->where('valid', true)->delete();
@@ -58,7 +58,7 @@ class OTP extends Facade
      */
     public function validate(User $identifier, string $token) : object
     {
-        dd($identifier);
+        // dd($identifier);
 
         $otp = Model::where('identifier', $identifier)->where('token', $token)->first();
 
