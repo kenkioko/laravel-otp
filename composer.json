@@ -18,7 +18,7 @@
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
-            "kenkioko\\OTP\\": "src/"
+            "Kenkioko\\OTP\\": "src/"
         }
     },
     "extra": {
@@ -32,5 +32,5 @@
         }
     },
     "require": {},
-    "description": "A simple package to generate and validate OTPs. forked from ichtrojan/laravel-otp"
+    "description": "A simple package to generate and validate OTPs. [forked from ichtrojan/laravel-otp] (https://github.com/ichtrojan/laravel-otp)"
 }

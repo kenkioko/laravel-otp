@@ -4,7 +4,7 @@
 
 This is a simple package to generate and validate OTPs (One Time Passwords). This can be implemented mostly in Authentication.
 This is a fork from [ichtrojan/laravel-otp](https://github.com/ichtrojan/laravel-otp).
-This version users the `App\User` as the default `$identifier` type instead of `string` type.
+This version user the `App\User` as the default `$identifier` type instead of `string` type.
 
 ## Installation 💽
 
@@ -57,6 +57,12 @@ Add alias to the `config/app.php` file
         'OTP' => Kenkioko\OTP\OTP::class,
     ];
 ...
+```
+
+Publish files with:
+
+```bash
+php artisan vendor:publish --provider="Kenkioko\OTP\OTPServiceProvider"
 ```
 
 Run Migrations
