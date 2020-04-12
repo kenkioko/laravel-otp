@@ -4,7 +4,7 @@
 
 This is a simple package to generate and validate OTPs (One Time Passwords). This can be implemented mostly in Authentication.
 This is a fork from [ichtrojan/laravel-otp](https://github.com/ichtrojan/laravel-otp).
-This version user the `App\User` as the default `$identifier` type instead of `string` type.
+In this version the default `$identifier` type is `App\User` instead of `string` type.
 
 ## Installation 💽
 
@@ -93,7 +93,8 @@ OTP::generate(App\User $identifier, int $digits = 4, int $validity = 10)
 ```php
 <?php
 
-$otp = OTP::generate('michael@okoh.co.uk', 6, 15);
+$user = App\User::find(1);
+$otp = OTP::generate($user, 6, 15);
 ```
 
 This will generate a six digit OTP that will be valid for 15 minutes and the success response will be:
@@ -122,7 +123,8 @@ OTP::validate(App\User $identifier, string $token)
 ```php
 <?php
 
-$otp = OTP::generate('michael@okoh.co.uk', '282581');
+$user = App\User::find(1);
+$otp = OTP::generate($user, '282581');
 ```
 
 #### Responses
@@ -164,5 +166,7 @@ $otp = OTP::generate('michael@okoh.co.uk', '282581');
 ```
 
 ## Contribution
+
+This is a fork from [ichtrojan/laravel-otp](https://github.com/ichtrojan/laravel-otp).
 
 If you find an issue with this package or you have any suggestion please help out. I am not perfect.

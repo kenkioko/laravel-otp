@@ -1,6 +1,6 @@
 <?php
 
-namespace KenKioko\OTP\Models;
+namespace Kenkioko\OTP\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
