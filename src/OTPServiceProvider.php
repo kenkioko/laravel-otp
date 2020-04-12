@@ -3,6 +3,7 @@
 namespace Kenkioko\OTP;
 
 use Illuminate\Support\ServiceProvider;
+use Kenkioko\OTP\Models\OTP;
 
 class OTPServiceProvider extends ServiceProvider
 {
@@ -13,6 +14,10 @@ class OTPServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        //
+        $this->app->bind('OTP', function ($app) {
+          return new OTP;
+        });
     }
 
     /**
@@ -36,4 +41,3 @@ class OTPServiceProvider extends ServiceProvider
         ], 'laravel-otp-migration');
     }
 }
-
