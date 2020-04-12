@@ -23,7 +23,16 @@ class OTP extends Model
      * @var array
      */
     protected $fillable = [
-      'token', 'validity'
+        'token', 'validity'
+    ];
+
+    /**
+     * The attributes that aren't mass assignable.
+     *
+     * @var array
+     */
+    protected $guarded = [
+        'valid'
     ];
 
     /**
@@ -44,24 +53,28 @@ class OTP extends Model
      */
     public function generate(User $identifier, int $digits = 4, int $validity = 10) : object
     {
-        $this->get_saved_otp($identifier)->where('valid', true)->delete();
+        $token = DB::transaction(function () use ($identifier, $digits, $validity) {
+            $token = str_pad($this->generatePin(), 4, '0', STR_PAD_LEFT);
 
-        $token = str_pad($this->generatePin(), 4, '0', STR_PAD_LEFT);
+            if ($digits == 5)
+                $token = str_pad($this->generatePin(5), 5, '0', STR_PAD_LEFT);
 
-        if ($digits == 5)
-            $token = str_pad($this->generatePin(5), 5, '0', STR_PAD_LEFT);
+            if ($digits == 6)
+                $token = str_pad($this->generatePin(6), 6, '0', STR_PAD_LEFT);
 
-        if ($digits == 6)
-            $token = str_pad($this->generatePin(6), 6, '0', STR_PAD_LEFT);
+            // delete saved tokens;
+            $this->get_saved_otp($identifier)->delete();
 
-        DB::transaction(function () use ($identifier, $token, $validity) {
-           $otp_new = new self([
+            // create a new token
+            $otp_new = new self([
               'token' => $token,
               'validity' => $validity
-          ]);
+            ]);
+            // save
+            $otp_new->user()->associate($identifier);
+            $otp_new->save();
 
-          $otp_new->user()->associate($identifier);
-          $otp_new->save();
+            return $token;
         });
 
         return (object)[
@@ -78,7 +91,9 @@ class OTP extends Model
      */
     public function validate(User $identifier, string $token) : object
     {
-        $otp = $this->get_saved_otp($identifier)->where('token', $token)->first();
+        $otp = $this->get_saved_otp($identifier)
+            ->where('token', $token)
+            ->first();
 
         if ($otp == null) {
             return (object)[
@@ -100,9 +115,6 @@ class OTP extends Model
                         'message' => 'OTP Expired'
                     ];
                 } else {
-                    $otp->valid = false;
-                    $otp->save();
-
                     return (object)[
                         'status' => true,
                         'message' => 'OTP is valid'
@@ -141,7 +153,38 @@ class OTP extends Model
     private function get_saved_otp($identifier)
     {
         return self::whereHas('user', function (Builder $query) use ($identifier) {
-          $query->where('user_id', $identifier->id);
+            $query->where('user_id', $identifier->id);
         });
     }
+
+    /**
+     * @param \App\User $identifier
+     * @param string $token
+     * @param int $validity
+     * @return mixed
+     */
+    public function extend(User $identifier, string $token, int $validity = 1) : object
+    {
+        $otp = $this->get_saved_otp($identifier)
+            ->where('token', $token)
+            ->where('valid', true)
+            ->first();
+
+        if ($otp) {
+            $otp->validity += $validity;
+            $otp->save();
+
+            return (object)[
+                'otp' => $otp,
+                'status' => true,
+                'message' => "OTP expiry extended by $validity mins",
+            ];
+        }
+
+        return (object)[
+            'status' => false,
+            'message' => "OTP is not valid",
+        ];
+    }
 }
+
