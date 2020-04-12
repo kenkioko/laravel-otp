@@ -1,11 +1,13 @@
 <?php
 
-namespace KenKioko\OTP;
+namespace Kenkioko\OTP;
 
 use App\User;
 use Carbon\Carbon;
-use KenKioko\OTP\Models\OTP as Model;
+use Kenkioko\OTP\Models\OTP as Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Facade;
+use Illuminate\Database\Eloquent\Builder;
 
 class OTP extends Facade
 {
@@ -18,17 +20,14 @@ class OTP extends Facade
     }
 
     /**
-     * @param string $identifier
+     * @param \App\User $identifier
      * @param int $digits
      * @param int $validity
      * @return mixed
      */
     public function generate(User $identifier, int $digits = 4, int $validity = 10) : object
     {
-        // dd($identifier);
-
-
-        Model::where('identifier', $identifier)->where('valid', true)->delete();
+        $this->get_saved_otp($identifier)->where('valid', true)->delete();
 
         $token = str_pad($this->generatePin(), 4, '0', STR_PAD_LEFT);
 
@@ -38,11 +37,15 @@ class OTP extends Facade
         if ($digits == 6)
             $token = str_pad($this->generatePin(6), 6, '0', STR_PAD_LEFT);
 
-        Model::create([
-            'identifier' => $identifier,
-            'token' => $token,
-            'validity' => $validity
-        ]);
+        DB::transaction(function () use ($identifier, $token, $validity) {
+           $otp_new = new Model([
+              'token' => $token,
+              'validity' => $validity
+          ]);
+
+          $otp_new->user()->associate($identifier);
+          $otp_new->save();
+        });
 
         return (object)[
             'status' => true,
@@ -52,21 +55,18 @@ class OTP extends Facade
     }
 
     /**
-     * @param string $identifier
+     * @param \App\User $identifier
      * @param string $token
      * @return mixed
      */
     public function validate(User $identifier, string $token) : object
     {
-        // dd($identifier);
-
-        $otp = Model::where('identifier', $identifier)->where('token', $token)->first();
+        $otp = $this->get_saved_otp($identifier)->where('token', $token)->first();
 
         if ($otp == null) {
             return (object)[
                 'status' => false,
                 'message' => 'OTP does not exist'
-                // __("laravel-otp::messages.otp_expired")])
             ];
         } else {
             if ($otp->valid == true) {
@@ -115,5 +115,16 @@ class OTP extends Facade
         }
 
         return $pin;
+    }
+
+    /**
+     * @param \App\User $identifier
+     * @return Illuminate\Database\Eloquent\Builder
+     */
+    private function get_saved_otp($identifier)
+    {
+        return Model::whereHas('user', function (Builder $query) use ($identifier) {
+          $query->where('user_id', $identifier->id);
+        });
     }
 }

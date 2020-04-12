@@ -13,7 +13,7 @@ class CreateOtpsTable extends Migration
      */
     public function up()
     {
-        Schema::create('otp', function (Blueprint $table) {
+        Schema::create('otps', function (Blueprint $table) {
             $table->bigIncrements('id')->index();
             $table->unsignedBigInteger('user_id');
             $table->string('token');
@@ -34,6 +34,6 @@ class CreateOtpsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('otp');
+        Schema::dropIfExists('otps');
     }
 }
