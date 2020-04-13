@@ -164,7 +164,7 @@ Please use the file as a template for other languages.
 }
 ```
 
-**Valid***
+**Valid**
 
 ```object
 {
@@ -174,7 +174,7 @@ Please use the file as a template for other languages.
 }
 ```
 
-**Not Valid***
+**Not Valid**
 
 ```object
 {
