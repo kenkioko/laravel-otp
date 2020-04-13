@@ -81,12 +81,12 @@ php artisan migrate
 ```php
 <?php
 
-OTP::generate(App\User $identifier, int $digits = 4, int $validity = 10)
+OTP::generate(App\User $identifier, int $digits = 4, int $validity = 5)
 ```
 
 * `$identifier`: The identity that will be tied to the OTP of type `\App\User::class`.
 * `$digit (optional | default = 4)`: The amount of digits to be generated, can be any of 4, 5 and 6.
-* `$validity (optional | default = 10)`: The validity period of the OTP in minutes.
+* `$validity (optional | default = 5)`: The validity period of the OTP in minutes.
 
 #### Sample
 
@@ -127,23 +127,50 @@ $user = App\User::find(1);
 $otp = OTP::generate($user, '282581');
 ```
 
+### Extend Expiry of OTP
+
+```php
+<?php
+
+OTP::extend(App\User $identifier, string $token, int $validity = 1)
+```
+
+* `$identifier`: The identity that is tied to the OTP of type `\App\User::class`.
+* `$token`: The token tied to the identity.
+* `$validity (optional | default = 1)`: The validity period of the OTP in minutes.
+
+#### Sample
+
+```php
+<?php
+
+$user = App\User::find(1);
+$otp = OTP::extend($user, '282581', 5);
+```
+
 #### Responses
+
+Uses Laravel's localization features to show the messages.
+The translations are found in `translations\en\messages.php` file.
+Please use the file as a template for other languages.
 
 **On Success**
 
 ```object
 {
   "status": true,
-  "message": "OTP is valid"
+  'message' => __("laravel-otp::messages.otp_message", ['password' => '12345']),
+  // "otp_message" => "Your one-time password (OTP) to enter the system is: :password"
 }
 ```
 
-**Does not exist**
+**Valid***
 
 ```object
 {
   "status": false,
-  "message": "OTP does not exist"
+  'message' => __("laravel-otp::messages.otp_valid"),
+  // "otp_valid" => "The one-time password (OTP) token is valid."
 }
 ```
 
@@ -152,7 +179,8 @@ $otp = OTP::generate($user, '282581');
 ```object
 {
   "status": false,
-  "message": "OTP is not valid"
+  'message' => __("laravel-otp::messages.otp_invalid"),
+  // "otp_invalid" => "The one-time password (OTP) token is  not valid".
 }
 ```
 
@@ -161,7 +189,38 @@ $otp = OTP::generate($user, '282581');
 ```object
 {
   "status": false,
-  "message": "OTP Expired"
+  'message' => __("laravel-otp::messages.otp_expired"),
+  // "otp_expired" => "token seems to be expired. Please request a new OTP code."
+}
+```
+
+**Missing field**
+
+```object
+{
+  "status": false,
+  'message' => __("laravel-otp::messages.otp_missing"),
+  // "otp_missing" => "The one-time password (OTP) token does not exist.",
+}
+```
+
+**Mismatch**
+
+```object
+{
+  "status": false,
+  'message' => __("laravel-otp::messages.otp_mismatch"),
+  // "otp_mismatch" => "The one-time password (OTP) token doesn't match any token in database."
+}
+```
+
+**Expiry extended**
+
+```object
+{
+  "status": false,
+  'message' => __("laravel-otp::messages.otp_extended", ['minutes' => 5 ]),
+  // "otp_extended" => "Your one-time password (OTP) token expiry was extended by :minutes minutes."
 }
 ```
 
