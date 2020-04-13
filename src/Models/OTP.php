@@ -183,7 +183,7 @@ class OTP extends Model
 
         return (object)[
             'status' => false,
-            'message' => __("laravel-otp::messages.code_mismatch"),
+            'message' => __("laravel-otp::messages.otp_mismatch"),
         ];
     }
 }
