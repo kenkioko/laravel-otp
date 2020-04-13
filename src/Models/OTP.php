@@ -80,7 +80,7 @@ class OTP extends Model
         return (object)[
             'status' => true,
             'token' => $token,
-            'message' => 'OTP generated'
+            'message' => __("laravel-otp::messages.otp_message", ['password' => $token]),
         ];
     }
 
@@ -98,7 +98,7 @@ class OTP extends Model
         if ($otp == null) {
             return (object)[
                 'status' => false,
-                'message' => 'OTP does not exist'
+                'message' => __("laravel-otp::messages.otp_missing"),
             ];
         } else {
             if ($otp->valid == true) {
@@ -112,18 +112,18 @@ class OTP extends Model
 
                     return (object)[
                         'status' => false,
-                        'message' => 'OTP Expired'
+                        'message' => __("laravel-otp::messages.otp_expired"),
                     ];
                 } else {
                     return (object)[
                         'status' => true,
-                        'message' => 'OTP is valid'
+                        'message' => __("laravel-otp::messages.otp_valid"),
                     ];
                 }
             } else {
                 return (object)[
                     'status' => false,
-                    'message' => 'OTP is not valid'
+                    'message' => __("laravel-otp::messages.otp_invalid"),
                 ];
             }
         }
@@ -177,14 +177,13 @@ class OTP extends Model
             return (object)[
                 'otp' => $otp,
                 'status' => true,
-                'message' => "OTP expiry extended by $validity mins",
+                'message' => __("laravel-otp::messages.otp_extended", ['minutes' => $validity]),
             ];
         }
 
         return (object)[
             'status' => false,
-            'message' => "OTP is not valid",
+            'message' => __("laravel-otp::messages.code_mismatch"),
         ];
     }
 }
-
